@@ -8,11 +8,14 @@ from fuzzywuzzy import process
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 # Load environment variables
 load_dotenv()
 
 # Discord client setup
-client = discord.Client()
+intents = discord.Intents.default()
+intents.messages = True  # Enables receiving messages
+client = discord.Client(intents=intents)
 
 # Function to retrieve and parse the JSON file
 def get_dj_data():
