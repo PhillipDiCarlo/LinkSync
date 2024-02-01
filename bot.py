@@ -1,8 +1,12 @@
 import discord
 import requests
+import logging
 from dotenv import load_dotenv
 import os
 from fuzzywuzzy import process
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables
 load_dotenv()
@@ -64,21 +68,30 @@ def parse_csv_and_fetch_links(csv_response, request_type):
 # Bot event handling
 @client.event
 async def on_ready():
-    print(f'Logged in as {client.user}')
+    logging.info(f'Logged in as {client.user}')
     global dj_data
-    dj_data = get_dj_data()
+    try:
+        dj_data = get_dj_data()
+        if dj_data is None:
+            logging.error('Failed to fetch or parse DJ data')
+    except Exception as e:
+        logging.error(f'Error during data fetching: {e}')
 
 @client.event
 async def on_message(message):
-    if client.user.mentioned_in(message) and message.mentions:
-        message_content = message.content
-        request_type = determine_request_type(message_content)
+    try:
+        if client.user.mentioned_in(message) and message.mentions:
+            message_content = message.content
+            request_type = determine_request_type(message_content)
 
-        # Get response from ChatGPT
-        csv_response = get_chatgpt_response(dj_data, message_content)
-        if csv_response:
-            links_response = parse_csv_and_fetch_links(csv_response, request_type)
-            response_message = "\n".join(links_response)
-            await message.channel.send(response_message)
+            csv_response = get_chatgpt_response(dj_data, message_content)
+            if csv_response:
+                links_response = parse_csv_and_fetch_links(csv_response, request_type)
+                response_message = "\n".join(links_response)
+                await message.channel.send(response_message)
+            else:
+                logging.warning('No response from ChatGPT or response parsing failed')
+    except Exception as e:
+        logging.error(f'Error handling message: {e}')
 
 client.run(os.getenv('DISCORD_BOT_TOKEN'))
