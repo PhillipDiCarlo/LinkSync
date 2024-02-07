@@ -4,6 +4,8 @@ import logging
 from dotenv import load_dotenv
 import os
 from fuzzywuzzy import process
+from openai import OpenAI
+import json
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -15,13 +17,28 @@ load_dotenv()
 # Discord client setup
 intents = discord.Intents.default()
 intents.messages = True  # Enables receiving messages
-client = discord.Client(intents=intents)
+discordClient = discord.Client(intents=intents)
+
+# OpenAI Client Setup
+openaiClient = OpenAI(
+    api_key=os.environ.get("CHATGPT_API_KEY")
+)
 
 # Function to retrieve and parse the JSON file
 def get_dj_data():
-    response = requests.get('https://github.com/PhillipDiCarlo/ClubLAAssets/blob/main/CLA_DJ_Links.json')
+    response = requests.get('https://raw.githubusercontent.com/PhillipDiCarlo/ClubLAAssets/main/CLA_DJ_Links.json')
     if response.status_code == 200:
-        return response.json()
+        global dj_vj_json
+        dj_vj_json = response.json()  # Save the entire JSON
+        # Extracting DJ and VJ names
+        dj_names = [dj['DJ_Name'] for dj in dj_vj_json.get('DJs', [])]
+        vj_names = [vj['VJ_Name'] for vj in dj_vj_json.get('VJs', [])]
+        all_names = dj_names + vj_names  # Combine DJ and VJ names
+        # Create CSV string
+        dj_vj_csv = ','.join(all_names)
+        # print("XYZ" + dj_vj_csv)
+
+        return dj_vj_csv
     else:
         return None
 
@@ -41,37 +58,44 @@ def determine_request_type(message):
 
 def get_chatgpt_response(dj_data, user_message):
     # Format the data for ChatGPT
-    prompt = (f"Please provide the exact DJ names from this message in CSV format, "
-              f"maintaining the order in which they are mentioned: '{user_message}'. "
-              f"Available DJs and VJs: {dj_data}")
 
-    # API call to ChatGPT
-    response = requests.post(
-        'https://api.openai.com/v1/engines/chatgpt/completions',
-        json={'prompt': prompt, 'max_tokens': 100},
-        headers={'Authorization': f'Bearer {os.getenv("CHATGPT_API_KEY")}'}
+    completion = openaiClient.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are an automated program designed to return a list of names (in CSV format) based from the given list of DJ/VJ names. You will return only a match of the given names in the same order as mentioned. If no possible match is available, please state the name that it couldnt match and say 'no match found'."},
+        {"role": "user", "content": f"Names requested {user_message} from the list {dj_data}."} 
+    ]
     )
-
-    if response.status_code == 200:
-        return response.json()['choices'][0]['text']
-    else:
-        return None
+    return completion.choices[0].message.content
 
 def parse_csv_and_fetch_links(csv_response, request_type):
     dj_names = csv_response.strip().split(',')
-    links = []
+    requestedLinks = []
+    # for name in dj_names:
+    #     name = name.strip()
+    #     if name in dj_data:
+    #         link_type = "Quest_Friendly" if request_type == 'quest' else "Non-Quest_Friendly"
+    #          # TODO: exception raised here, im not using the right variable here. might need to be dj_vj_json
+    #         link = dj_data[name].get(link_type, "Link not found")
+    #         requestedLinks.append(f"{name} - {link}")
+    # return requestedLinks
+
+    # Loop through both DJs and VJs
     for name in dj_names:
-        name = name.strip()
-        if name in dj_data:
-            link_type = "Quest_Friendly" if request_type == 'quest' else "Non-Quest_Friendly"
-            link = dj_data[name].get(link_type, "Link not found")
-            links.append(f"{name} - {link}")
-    return links
+        for category in ['DJs', 'VJs']:
+            for item in dj_vj_json.get(category, []):
+                if item.get('DJ_Name') == name:
+                    link = item.get(request_type)
+                    requestedLinks.appead(f"{name} - {link}")
+                    # return item.get(request_type)
+
+        return requestedLinks  # Return None if the DJ/VJ was not found
+
 
 # Bot event handling
-@client.event
+@discordClient.event
 async def on_ready():
-    logging.info(f'Logged in as {client.user}')
+    logging.info(f'Logged in as {discordClient.user}')
     global dj_data
     try:
         dj_data = get_dj_data()
@@ -80,10 +104,10 @@ async def on_ready():
     except Exception as e:
         logging.error(f'Error during data fetching: {e}')
 
-@client.event
+@discordClient.event
 async def on_message(message):
     try:
-        if client.user.mentioned_in(message) and message.mentions:
+        if discordClient.user.mentioned_in(message) and message.mentions:
             message_content = message.content
             request_type = determine_request_type(message_content)
 
@@ -97,4 +121,4 @@ async def on_message(message):
     except Exception as e:
         logging.error(f'Error handling message: {e}')
 
-client.run(os.getenv('DISCORD_BOT_TOKEN'))
+discordClient.run(os.getenv('DISCORD_BOT_TOKEN'))
