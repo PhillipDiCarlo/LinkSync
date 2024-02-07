@@ -61,11 +61,13 @@ def determine_request_type(message):
 def get_chatgpt_response(dj_data, user_message):
     # Format the data for ChatGPT
     cleaned_text = re.sub(r"<@.*?>", "", user_message)
-    
+    pattern = r"(non[-\s]?quest\s+)?links?\s+for|quest\s+link[s]?|non[-\s]?quest\s+link[s]?|quest|non[-\s]?quest"
+    cleaned_text = re.sub(pattern, "", cleaned_text, flags=re.IGNORECASE).strip()    
+
     completion = openaiClient.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
-        {"role": "system", "content": "You are an automated program designed to return a list of names (in CSV format) based from the given list of DJ/VJ names. You will return only a match of the given names in the same order as mentioned."},
+        {"role": "system", "content": "You are an automated program designed to return a list of names (in CSV format) based from the given list of DJ/VJ names. You will return only a match of the given names in the same order as mentioned. Please note the names may be given mistyped."},
         {"role": "user", "content": f"Names requested {cleaned_text} from the list {dj_data}."} 
     ]
     )
