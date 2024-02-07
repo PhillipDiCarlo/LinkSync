@@ -6,6 +6,8 @@ import os
 from fuzzywuzzy import process
 from openai import OpenAI
 import json
+import re
+
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -58,12 +60,13 @@ def determine_request_type(message):
 
 def get_chatgpt_response(dj_data, user_message):
     # Format the data for ChatGPT
-
+    cleaned_text = re.sub(r"<@.*?>", "", user_message)
+    
     completion = openaiClient.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
-        {"role": "system", "content": "You are an automated program designed to return a list of names (in CSV format) based from the given list of DJ/VJ names. You will return only a match of the given names in the same order as mentioned. If no possible match is available, please state the name that it couldnt match and say 'no match found'."},
-        {"role": "user", "content": f"Names requested {user_message} from the list {dj_data}."} 
+        {"role": "system", "content": "You are an automated program designed to return a list of names (in CSV format) based from the given list of DJ/VJ names. You will return only a match of the given names in the same order as mentioned."},
+        {"role": "user", "content": f"Names requested {cleaned_text} from the list {dj_data}."} 
     ]
     )
     return completion.choices[0].message.content
@@ -71,6 +74,7 @@ def get_chatgpt_response(dj_data, user_message):
 def parse_csv_and_fetch_links(csv_response, request_type):
     dj_names = csv_response.strip().split(',')
     requestedLinks = []
+    link_type = "Quest_Friendly" if request_type == 'quest' else "Non-Quest_Friendly"
     # for name in dj_names:
     #     name = name.strip()
     #     if name in dj_data:
@@ -81,15 +85,19 @@ def parse_csv_and_fetch_links(csv_response, request_type):
     # return requestedLinks
 
     # Loop through both DJs and VJs
+    nameFound = False
     for name in dj_names:
+        nameFound = False
         for category in ['DJs', 'VJs']:
+            if nameFound == True:
+                break
             for item in dj_vj_json.get(category, []):
                 if item.get('DJ_Name') == name:
-                    link = item.get(request_type)
-                    requestedLinks.appead(f"{name} - {link}")
-                    # return item.get(request_type)
-
-        return requestedLinks  # Return None if the DJ/VJ was not found
+                    link = item.get(link_type)
+                    requestedLinks.append(f"{name} - {link}")
+                    nameFound = True
+                    break
+    return requestedLinks  # Return None if the DJ/VJ was not found
 
 
 # Bot event handling
