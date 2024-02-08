@@ -46,17 +46,12 @@ def get_dj_data():
 
 # Function to determine request type (Quest or Non-Quest)
 def determine_request_type(message):
-    quest_keywords = ['quest', 'quest friendly', 'quest compatible']
+    # quest_keywords = ['quest', 'quest friendly', 'quest compatible']
     non_quest_keywords = ['non quest', 'non-quest', 'no quest', 'non quest friendly', 'non-quest compatible']
 
-    quest_match = process.extractOne(message, quest_keywords)
-    non_quest_match = process.extractOne(message, non_quest_keywords)
-
-    # Default to Quest if no clear type is found
-    if non_quest_match[1] > quest_match[1]:
-        return 'non-quest'
-    else:
-        return 'quest'  
+    if any(keyword in message.lower() for keyword in non_quest_keywords):
+        return "non-quest"
+    return "quest"
 
 def get_chatgpt_response(dj_data, user_message):
     
@@ -70,9 +65,10 @@ def get_chatgpt_response(dj_data, user_message):
 
     finalMatchedNames = {}
     for name in requested_names:
-        best_match = process.extractOne(name, dj_data)
+        best_match = process.extractOne(name, dj_name_list)
         finalMatchedNames[name] = best_match[0]
     
+    return finalMatchedNames
 
 
     # completion = openaiClient.chat.completions.create(
@@ -97,7 +93,7 @@ def parse_csv_and_fetch_links(matched_names, request_type):
             for item in dj_vj_json.get(category, []):
                 if item.get('DJ_Name') == matched_name:  # Use matched_name
                     link = item.get(link_type)
-                    requestedLinks.append(f"{original_name} ({matched_name}) - {link}")
+                    requestedLinks.append(f"{matched_name} - {link}")
                     nameFound = True
                     break
     
