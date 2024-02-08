@@ -38,6 +38,7 @@ You need to create a Discord bot on the Discord Developer Portal and generate a 
 
 5. **Configure Environment Variables**
 Create a `.env` file in the root directory of the project. Add the following line, replacing `<Your-Discord-Bot-Token>` with the token you obtained from the Discord Developer Portal.
+`DISCORD_BOT_TOKEN=<Your-Discord-Bot-Token>`
 
 
 6. **Run the Bot**
