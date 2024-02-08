@@ -21,27 +21,19 @@ The bot leverages the `fuzzywuzzy` Python library to handle variations and poten
 
 ### Steps
 
-1. **Clone the Repository**
-   Begin by cloning this repository to your local machine.
-
-
-2. **Create a Virtual Environment (Optional)**
-It's recommended to create a virtual environment for Python projects to manage dependencies more effectively.
-
-
-3. **Install Dependencies**
+1. **Install Dependencies**
 Install the required Python packages listed in `requirements.txt`.
 
 
-4. **Discord Bot Token**
+2. **Discord Bot Token**
 You need to create a Discord bot on the Discord Developer Portal and generate a bot token. Follow the instructions [here](https://discord.com/developers/docs/intro) to create a bot and get your token.
 
-5. **Configure Environment Variables**
+3. **Configure Environment Variables**
 Create a `.env` file in the root directory of the project. Add the following line, replacing `<Your-Discord-Bot-Token>` with the token you obtained from the Discord Developer Portal.
 `DISCORD_BOT_TOKEN=<Your-Discord-Bot-Token>`
 
 
-6. **Run the Bot**
+4. **Run the Bot**
 With the environment variable set, you can now run the bot using Python.
 
 
