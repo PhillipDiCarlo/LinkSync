@@ -116,6 +116,7 @@ async def on_ready():
 async def on_message(message):
     try:
         if discordClient.user.mentioned_in(message) and message.mentions:
+            dj_data = get_dj_data()
             message_content = message.content
             request_type = determine_request_type(message_content)
 
@@ -125,7 +126,8 @@ async def on_message(message):
                 response_message = "\n".join(links_response)
                 await message.channel.send(response_message)
             else:
-                logging.warning('No response from ChatGPT or response parsing failed')
+                logging.warning('Response parsing failed')
+                message.channel.send("Sorry, please try again.")
     except Exception as e:
         logging.error(f'Error handling message: {e}')
 
