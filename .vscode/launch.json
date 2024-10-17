@@ -2,18 +2,6 @@
     "version": "0.2.0",
     "configurations": [
 
-
-        {
-            "name": "Flask: Run Server",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/stripe_webhook_service.py",
-            "console": "integratedTerminal",
-            "env": {
-                "FLASK_APP": "src/stripe_webhook_service",
-                "FLASK_ENV": "development"
-            }
-        },
         {
             "name": "Python: Bot",
             "type": "debugpy",
@@ -21,27 +9,23 @@
             "program": "${workspaceFolder}/src/bot.py",
             "console": "integratedTerminal"
         },
-        // {
-        //     "name": "Flask: Discord Login",
-        //     "type": "debugpy",
-        //     "request": "launch",
-        //     "program": "${workspaceFolder}/src/discord_login_for_checkout.py",
-        //     "console": "integratedTerminal",
-        //     "env": {
-        //         "FLASK_APP": "src/discord_login_for_checkout",
-        //         "FLASK_ENV": "development"
-        //     }
-        // },
         {
-            "name": "Flask: Stripe Subcription Manager",
+            "name": "Python: Link Moderator Tool",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/src/subscription_manager.py",
-            "console": "integratedTerminal",
-            "env": {
-                "FLASK_APP": "src/subscription_manager",
-                "FLASK_ENV": "development"
-            }
+            "program": "${workspaceFolder}/src/linkModerator.py",
+            "console": "integratedTerminal"
         }
+        // {
+        //     "name": "Flask: Stripe Subcription Manager",
+        //     "type": "debugpy",
+        //     "request": "launch",
+        //     "program": "${workspaceFolder}/src/subscription_manager.py",
+        //     "console": "integratedTerminal",
+        //     "env": {
+        //         "FLASK_APP": "src/subscription_manager",
+        //         "FLASK_ENV": "development"
+        //     }
+        // }
     ]
 }
