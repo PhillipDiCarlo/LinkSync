@@ -8,8 +8,8 @@ from discord import app_commands
 # Load environment variables
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-DATABASE_URL = os.getenv('DATABASE_URL')
-SUBSCRIPTION_LINK = "https://your_subscription_link_here"  # Replace with your actual link
+DATABASE_URL = os.getenv('DATABASE_URL_DJ')
+SUBSCRIPTION_LINK = "https://esattotech.com/pricing/"
 
 # Setup logging with dynamic level
 logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'), format='%(asctime)s - %(levelname)s - %(message)s')
@@ -95,7 +95,7 @@ async def get_dj_links(
         else:
             links_response.append(f"No match found for **{dj_name}**.")
     
-    await interaction.response.send_message("\n".join(links_response), ephemeral=True)
+    await interaction.response.send_message("\n".join(links_response))
 
 # Event handling
 @bot.event

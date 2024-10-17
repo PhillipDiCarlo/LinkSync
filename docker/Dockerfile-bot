@@ -1,21 +1,21 @@
-# Use a lightweight Python image
+# Dockerfile-bot
+
+# Use an official Python runtime as a parent image
 FROM python:3.10-slim
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy requirements file and install dependencies
-COPY requirements.txt ./
+COPY config/other_configs/requirements.txt requirements.txt
+
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the bot code into the container
-COPY bot.py ./
+# Copy the entire project
+COPY src/ src/
 
-# Copy .env for environment variables
-COPY .env ./
+# Expose the port
+EXPOSE 5001
 
-# Expose the necessary port if required by the bot (usually not needed for Discord bots)
-EXPOSE 8000
-
-# Run the bot
-CMD ["python", "bot.py"]
+# Run bot.py when the container launches
+CMD ["python", "src/bot.py"]
