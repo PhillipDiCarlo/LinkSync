@@ -1,6 +1,0 @@
-discord.py
-requests
-python-dotenv
-fuzzywuzzy
-python-Levenshtein  # Improves fuzzywuzzy performance
-# openai

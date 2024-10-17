@@ -1,0 +1,21 @@
+# Use a lightweight Python image
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements file and install dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the bot code into the container
+COPY bot.py ./
+
+# Copy .env for environment variables
+COPY .env ./
+
+# Expose the necessary port if required by the bot (usually not needed for Discord bots)
+EXPOSE 8000
+
+# Run the bot
+CMD ["python", "bot.py"]

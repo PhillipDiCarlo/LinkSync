@@ -1,0 +1,8 @@
+discord.py
+requests
+python-dotenv
+psycopg2-binary  # PostgreSQL adapter for Python
+stripe
+gunicorn
+Flask
+SQLAlchemy

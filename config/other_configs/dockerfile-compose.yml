@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  dj-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile-bot
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - SUBSCRIPTION_LINK=${SUBSCRIPTION_LINK}
+    volumes:
+      - .:/app
+    restart: always
+  
+  subscription-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PAYMENT_WEBHOOK_SECRET=${STRIPE_PAYMENT_WEBHOOK_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
+      - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "5440:5440"  # Maps container's port 5440 to host's port 5440
+    restart: always
+
