@@ -108,6 +108,9 @@ async def get_dj_links(
 async def add_link(interaction: discord.Interaction, dj_name: str, dj_link: str):
     submitter_id = interaction.user.id
 
+    # Respond with a defer message first
+    await interaction.response.defer(ephemeral=True)
+
     # Check if the DJ exists in the 'links' or 'requests' table
     def search_existing_dj(dj_name):
         conn = psycopg2.connect(DATABASE_URL)
@@ -154,7 +157,7 @@ async def add_link(interaction: discord.Interaction, dj_name: str, dj_link: str)
         view = ConfirmView()
 
         # Send the message with the buttons and wait for the user's interaction
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"Is this the DJ you're referring to?\n**DJ Name**: {existing_dj_name}\n**Quest Link**: {existing_dj_link}",
             view=view,
             ephemeral=True
