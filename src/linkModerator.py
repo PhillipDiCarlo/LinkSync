@@ -17,14 +17,11 @@ def convert_links(quest_link):
         username = quest_link.replace("https://stream.vrcdn.live/live/", "").replace(".live.ts", "")
         non_quest_link = f"rtspt://stream.vrcdn.live/live/{username}"
 
-    
     if quest_link.startswith("rtspt://stream.vrcdn.live/live/"):
         # Convert Non-Quest link to Quest link by adding '.live.ts'
         username = quest_link.replace("rtspt://stream.vrcdn.live/live/", "")
         quest_link = f"https://stream.vrcdn.live/live/{username}.live.ts"
 
-
-    # Both twitch.tv and youtube.com are valid for both Quest and Non-Quest
     return quest_link, non_quest_link
 
 # Function to fetch the next request in FIFO order
@@ -41,6 +38,15 @@ def fetch_similar_djs(dj_name):
     """, (dj_name,))
     return cursor.fetchone()
 
+# Function to enable or disable buttons based on whether there are requests
+def update_button_states():
+    if request_data:
+        accept_button.config(state=tk.NORMAL)
+        deny_button.config(state=tk.NORMAL)
+    else:
+        accept_button.config(state=tk.DISABLED)
+        deny_button.config(state=tk.DISABLED)
+
 # Function to accept the request
 def accept_request():
     dj_name = dj_name_entry.get()
@@ -48,13 +54,11 @@ def accept_request():
     non_quest_link = non_quest_link_entry.get()
     request_id = request_data[0]
 
-    # Insert into links table
     cursor.execute("""
     INSERT INTO links (dj_name, quest_link, non_quest_link)
     VALUES (%s, %s, %s)
     """, (dj_name, quest_link, non_quest_link))
 
-    # Remove from requests table
     cursor.execute("DELETE FROM requests WHERE id = %s", (request_id,))
     conn.commit()
 
@@ -76,8 +80,13 @@ def load_next_request():
     request_data = fetch_next_request()
 
     if not request_data:
-        messagebox.showinfo("No Requests", "No more DJ requests to review.")
-        root.quit()  # Exit the application if there are no more requests
+        dj_name_entry.delete(0, tk.END)
+        quest_link_entry.delete(0, tk.END)
+        non_quest_link_entry.delete(0, tk.END)
+        similar_dj_name.set("No more DJ requests to review.")
+        similar_quest_link.set("")
+        similar_non_quest_link.set("")
+        update_button_states()  # Disable buttons
         return
 
     dj_name_entry.delete(0, tk.END)
@@ -103,48 +112,123 @@ def load_next_request():
         similar_quest_link.set("")
         similar_non_quest_link.set("")
 
+    update_button_states()  # Enable buttons
+
+# Function to refresh and check for new requests
+def refresh_requests():
+    load_next_request()
+    if request_data:
+        messagebox.showinfo("Refreshed", "New DJ requests found!")
+    else:
+        messagebox.showinfo("No Requests", "No new DJ requests.")
+
 # Set up the GUI
 root = tk.Tk()
 root.title("DJ Request Reviewer")
 
-# Define the new size (twice the width, 1.5 times the height)
-default_width = 400  # Example default width
-default_height = 300  # Example default height
-
-# new_width = default_width * 2  # Twice the width
-# new_height = int(default_height * 1.5)  # 1.5 times the height
-
-# Set the window size
+default_width = 400
+default_height = 250
 root.geometry(f"{default_width}x{default_height}")
 
 # Similar DJ Info
 similar_dj_name = tk.StringVar()
-similar_quest_link = tk.StringVar()
-similar_non_quest_link = tk.StringVar()
 
 tk.Label(root, textvariable=similar_dj_name).grid(row=0, column=0, columnspan=2)
-tk.Label(root, textvariable=similar_quest_link).grid(row=1, column=0, columnspan=2)
-tk.Label(root, textvariable=similar_non_quest_link).grid(row=2, column=0, columnspan=2)
+
+# Label for Similar DJ Quest Link
+tk.Label(root, text="Quest Link").grid(row=1, column=0)
+quest_link_entry_similar = tk.Entry(root, width=40)
+quest_link_entry_similar.grid(row=1, column=1)
+quest_link_entry_similar.config(state=tk.DISABLED)  # Make it read-only
+
+# Label for Similar DJ Non-Quest Link
+tk.Label(root, text="Non-Quest Link").grid(row=2, column=0)
+non_quest_link_entry_similar = tk.Entry(root, width=40)
+non_quest_link_entry_similar.grid(row=2, column=1)
+non_quest_link_entry_similar.config(state=tk.DISABLED)  # Make it read-only
+
+# Spacer between the sections
+tk.Label(root, text="").grid(row=3, column=0, columnspan=2)  # Empty label as a spacer
 
 # Editable fields for the requested DJ with increased width
-tk.Label(root, text="DJ Name").grid(row=3, column=0)
-dj_name_entry = tk.Entry(root, width=40)  # Increased width
-dj_name_entry.grid(row=3, column=1)
+tk.Label(root, text="DJ Name").grid(row=4, column=0)
+dj_name_entry = tk.Entry(root, width=40)
+dj_name_entry.grid(row=4, column=1)
 
-tk.Label(root, text="Quest Link").grid(row=4, column=0)
-quest_link_entry = tk.Entry(root, width=40)  # Increased width
-quest_link_entry.grid(row=4, column=1)
+tk.Label(root, text="Quest Link").grid(row=5, column=0)
+quest_link_entry = tk.Entry(root, width=40)
+quest_link_entry.grid(row=5, column=1)
 
-tk.Label(root, text="Non-Quest Link").grid(row=5, column=0)
-non_quest_link_entry = tk.Entry(root, width=40)  # Increased width
-non_quest_link_entry.grid(row=5, column=1)
+tk.Label(root, text="Non-Quest Link").grid(row=6, column=0)
+non_quest_link_entry = tk.Entry(root, width=40)
+non_quest_link_entry.grid(row=6, column=1)
 
-# Accept and Deny buttons
+# Accept and Deny buttons (initially disabled if no requests)
 accept_button = tk.Button(root, text="Accept", command=accept_request)
-accept_button.grid(row=6, column=0)
+accept_button.grid(row=7, column=0)
 
 deny_button = tk.Button(root, text="Deny", command=deny_request)
-deny_button.grid(row=7, column=0)
+deny_button.grid(row=8, column=0)
+
+# Refresh button to check for new requests
+refresh_button = tk.Button(root, text="Refresh", command=refresh_requests)
+refresh_button.grid(row=7, column=1)
+
+# Function to load the next request and populate the form
+def load_next_request():
+    global request_data
+    request_data = fetch_next_request()
+
+    if not request_data:
+        dj_name_entry.delete(0, tk.END)
+        quest_link_entry.delete(0, tk.END)
+        non_quest_link_entry.delete(0, tk.END)
+        quest_link_entry_similar.config(state=tk.NORMAL)
+        quest_link_entry_similar.delete(0, tk.END)
+        quest_link_entry_similar.config(state=tk.DISABLED)
+        non_quest_link_entry_similar.config(state=tk.NORMAL)
+        non_quest_link_entry_similar.delete(0, tk.END)
+        non_quest_link_entry_similar.config(state=tk.DISABLED)
+        similar_dj_name.set("No more DJ requests to review.")
+        update_button_states()  # Disable buttons
+        return
+
+    dj_name_entry.delete(0, tk.END)
+    dj_name_entry.insert(0, request_data[1])
+
+    dj_link = request_data[2]
+    quest_link, non_quest_link = convert_links(dj_link)
+
+    quest_link_entry.delete(0, tk.END)
+    quest_link_entry.insert(0, quest_link)
+
+    non_quest_link_entry.delete(0, tk.END)
+    non_quest_link_entry.insert(0, non_quest_link)
+
+    # Fetch and display similar DJs
+    similar_dj = fetch_similar_djs(request_data[1])
+    if similar_dj:
+        similar_dj_name.set(f"Similar DJ: {similar_dj[0]}")
+        quest_link_entry_similar.config(state=tk.NORMAL)
+        quest_link_entry_similar.delete(0, tk.END)
+        quest_link_entry_similar.insert(0, similar_dj[1])
+        quest_link_entry_similar.config(state=tk.DISABLED)
+
+        non_quest_link_entry_similar.config(state=tk.NORMAL)
+        non_quest_link_entry_similar.delete(0, tk.END)
+        non_quest_link_entry_similar.insert(0, similar_dj[2])
+        non_quest_link_entry_similar.config(state=tk.DISABLED)
+    else:
+        similar_dj_name.set("No similar DJs found")
+        quest_link_entry_similar.config(state=tk.NORMAL)
+        quest_link_entry_similar.delete(0, tk.END)
+        quest_link_entry_similar.config(state=tk.DISABLED)
+
+        non_quest_link_entry_similar.config(state=tk.NORMAL)
+        non_quest_link_entry_similar.delete(0, tk.END)
+        non_quest_link_entry_similar.config(state=tk.DISABLED)
+
+    update_button_states()  # Enable buttons
 
 # Load the first request
 load_next_request()
