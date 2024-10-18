@@ -12,6 +12,7 @@ load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 DATABASE_URL = os.getenv('DATABASE_URL_DJ')
 SUBSCRIPTION_LINK = "https://esattotech.com/pricing/"
+HOME_DISCORD_SERVER = os.getenv('HOME_DISCORD_SERVER')
 
 # Setup logging with dynamic level
 logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'), format='%(asctime)s - %(levelname)s - %(message)s')
@@ -75,12 +76,15 @@ async def get_dj_links(
     slot_count: int = 4, 
     dj_names: str = ""
 ):
-    if not check_user_subscription(interaction.user.id):
-        await interaction.response.send_message(
-            f"You do not have an active subscription. Please [click here]({SUBSCRIPTION_LINK}) to subscribe.",
-            ephemeral=True
-        )
-        return
+    # Check if the user is in your specific Discord server
+    if interaction.guild_id != HOME_DISCORD_SERVER:
+        # If not in the specific server, check the user's subscription
+        if not check_user_subscription(interaction.user.id):
+            await interaction.response.send_message(
+                f"You do not have an active subscription. Please [click here]({SUBSCRIPTION_LINK}) to subscribe.",
+                ephemeral=True
+            )
+            return
 
     # Split the DJ names from the input
     dj_names_list = [name.strip() for name in dj_names.split(',')][:slot_count]
