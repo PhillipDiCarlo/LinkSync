@@ -120,13 +120,10 @@ async def add_link(interaction: discord.Interaction, dj_name: str, dj_link: str)
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-        # Search both links and requests table using similarity matching
+        # Search only the links table using similarity matching
         query = """
         SELECT dj_name, quest_link FROM links 
-        WHERE SIMILARITY(dj_name, %s) > 0.4
-        UNION
-        SELECT dj_name, dj_link FROM requests 
-        WHERE SIMILARITY(dj_name, %s) > 0.4
+        WHERE SIMILARITY(LOWER(dj_name), LOWER(%s)) > 0.4
         LIMIT 1;
         """
         cursor.execute(query, (dj_name, dj_name))
