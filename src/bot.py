@@ -124,7 +124,7 @@ async def add_link(interaction: discord.Interaction, dj_name: str, dj_link: str)
         WHERE SIMILARITY(LOWER(dj_name), LOWER(%s)) > 0.4
         LIMIT 1;
         """
-        cursor.execute(query, (dj_name, dj_name))
+        cursor.execute(query, (dj_name,))
         row = cursor.fetchone()
         cursor.close()
         conn.close()
