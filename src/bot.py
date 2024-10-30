@@ -67,13 +67,11 @@ def get_dj_links_from_db(dj_name, is_quest):
 @bot.tree.command(name="get_dj_links", description="Retrieve DJ links based on your preferences.")
 @app_commands.describe(
     quest="Do you want Quest links? Select True or False.",
-    slot_count="How many DJ slots would you like? (Default: 4)",
     dj_names="Enter DJ names separated by commas."
 )
 async def get_dj_links(
     interaction: discord.Interaction, 
     quest: bool, 
-    slot_count: int = 4, 
     dj_names: str = ""
 ):
     # Check if the user is in your specific Discord server
@@ -87,7 +85,7 @@ async def get_dj_links(
             return
 
     # Split the DJ names from the input
-    dj_names_list = [name.strip() for name in dj_names.split(',')][:slot_count]
+    dj_names_list = [name.strip() for name in dj_names.split(',')]
 
     # Prepare response
     links_response = [f"Quest Compatible = {quest}"]
