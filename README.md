@@ -1,4 +1,3 @@
-```markdown
 # Discord DJ Link Retrieval Bot
 
 ## Overview
@@ -41,7 +40,7 @@ The bot listens for specific commands within Discord and provides easy access to
    ```
 
 2. **Discord Bot Token**
-   Create a Discord bot on the Discord Developer Portal and generate a bot token. Follow the instructions [here](https://discord.com/developers/docs/intro) to create a bot and get your token.
+   Create a Discord bot on the [Discord Developer Portal](https://discord.com/developers/docs/intro) and generate a bot token. Follow the instructions there to create a bot and get your token.
 
 3. **Configure Environment Variables**
    Set up a `.env` file in the root directory with the following variables:
@@ -63,4 +62,3 @@ To add the bot to your Discord server, navigate to the OAuth2 page in the Discor
 
 ## Contributions
 Contributions are welcome! If you have suggestions for improvements, new features, or bug fixes, feel free to open an issue or submit a pull request.
-```
