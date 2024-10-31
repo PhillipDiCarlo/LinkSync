@@ -6,6 +6,3 @@ services:
     ports:
       - "5001:5001"
     image: dj-retrieval-bot
-    # environment:
-    #   - DATABASE_URL_DJ=${DATABASE_URL_DJ}
-    #   - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
