@@ -16,16 +16,5 @@
             "program": "${workspaceFolder}/src/linkModerator.py",
             "console": "integratedTerminal"
         }
-        // {
-        //     "name": "Flask: Stripe Subcription Manager",
-        //     "type": "debugpy",
-        //     "request": "launch",
-        //     "program": "${workspaceFolder}/src/subscription_manager.py",
-        //     "console": "integratedTerminal",
-        //     "env": {
-        //         "FLASK_APP": "src/subscription_manager",
-        //         "FLASK_ENV": "development"
-        //     }
-        // }
     ]
 }
