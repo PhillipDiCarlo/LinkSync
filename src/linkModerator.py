@@ -2,9 +2,36 @@ import os
 import tkinter as tk
 import psycopg2
 from tkinter import messagebox
+import sys
+from dotenv import load_dotenv
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for PyInstaller and development """
+    if getattr(sys, 'frozen', False):
+        # Running in a PyInstaller bundle
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # Running in a normal Python environment
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, relative_path)
+
+
+
+# Load environment variables from .env file
+dotenv_path = resource_path('.env')
+load_dotenv(dotenv_path=dotenv_path)
+
+# Debugging: Check if the .env file was loaded
+if not os.path.exists(dotenv_path):
+    messagebox.showerror("Error", f".env file not found at {dotenv_path}")
+    sys.exit(1)
 
 # Database connection setup
 DATABASE_URL = os.getenv('DATABASE_URL_DJ')
+if not DATABASE_URL:
+    messagebox.showerror("Error", "DATABASE_URL_DJ is not set. Please check your .env file.")
+    sys.exit(1)
 conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
