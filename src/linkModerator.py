@@ -48,6 +48,13 @@ def convert_links(quest_link):
         # Convert Non-Quest link to Quest link by adding '.live.ts'
         username = quest_link.replace("rtspt://stream.vrcdn.live/live/", "")
         quest_link = f"https://stream.vrcdn.live/live/{username}.live.ts"
+    
+    # Convert rtmp to rtspt and quest compatible
+    if quest_link.startswith("rtmp://stream.vrcdn.live/live/"):
+        # Convert Non-Quest link to Quest link by adding '.live.ts'
+        username = quest_link.replace("rtmp://stream.vrcdn.live/live/", "")
+        quest_link = f"https://stream.vrcdn.live/live/{username}.live.ts"
+        non_quest_link = f"rtspt://stream.vrcdn.live/live/{username}"
 
     return quest_link, non_quest_link
 
