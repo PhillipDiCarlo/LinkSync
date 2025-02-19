@@ -19,7 +19,6 @@ logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'), format='%(asctime)s - 
 
 # Initialize the Discord bot with intents
 intents = discord.Intents.default()
-intents.members = True  # Enable the members intent if needed for member-related events
 
 class MyBot(discord.Client):
     def __init__(self):
