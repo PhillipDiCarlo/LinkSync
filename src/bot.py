@@ -18,8 +18,10 @@ WHITELISTED_SERVERS = os.getenv('WHITELISTED_SERVERS')
 # Parse the environment variable into a list of integers
 if WHITELISTED_SERVERS:
     WHITELISTED_SERVERS_LIST = [int(sid.strip()) for sid in WHITELISTED_SERVERS.split(',')]
+    # logging.info(f"Whitelisted servers: {', '.join(map(str, WHITELISTED_SERVERS_LIST))}")
 else:
     WHITELISTED_SERVERS_LIST = []
+    # logging.info("No servers are whitelisted.")
 
 logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'), format='%(asctime)s - %(levelname)s - %(message)s')
 intents = discord.Intents.default()
@@ -190,6 +192,10 @@ async def on_ready():
     bot.last_startup_time = discord.utils.utcnow()
     logging.info(f'Bot is ready. Logged in as {bot.user}')
     logging.info(f"Bot started at {bot.last_startup_time}")
+    if WHITELISTED_SERVERS:
+        logging.info(f"Whitelisted servers: {', '.join(map(str, WHITELISTED_SERVERS_LIST))}")
+    else:
+        logging.info("No servers are whitelisted.")
 
 # Run the bot
 bot.run(DISCORD_BOT_TOKEN)
