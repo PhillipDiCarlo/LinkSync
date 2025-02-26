@@ -12,12 +12,16 @@ load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 DATABASE_URL = os.getenv('DATABASE_URL_DJ')
 SUBSCRIPTION_LINK = "https://esattotech.com/pricing/"
-HOME_DISCORD_SERVER = os.getenv('HOME_DISCORD_SERVER')
 
-# Setup logging with dynamic level
+WHITELISTED_SERVERS = os.getenv('WHITELISTED_SERVERS')
+
+# Parse the environment variable into a list of integers
+if WHITELISTED_SERVERS:
+    WHITELISTED_SERVERS_LIST = [int(sid.strip()) for sid in WHITELISTED_SERVERS.split(',')]
+else:
+    WHITELISTED_SERVERS_LIST = []
+
 logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'), format='%(asctime)s - %(levelname)s - %(message)s')
-
-# Initialize the Discord bot with intents
 intents = discord.Intents.default()
 
 class MyBot(discord.Client):
@@ -68,14 +72,10 @@ def get_dj_links_from_db(dj_name, is_quest):
     quest="Do you want Quest links? Select True or False.",
     dj_names="Enter DJ names separated by commas."
 )
-async def get_dj_links(
-    interaction: discord.Interaction, 
-    quest: bool, 
-    dj_names: str = ""
-):
-    # Check if the user is in your specific Discord server
-    if interaction.guild_id != HOME_DISCORD_SERVER:
-        # If not in the specific server, check the user's subscription
+async def get_dj_links(interaction: discord.Interaction, quest: bool, dj_names: str = ""):
+    # Check if this server is in the whitelisted list of servers
+    if interaction.guild_id not in WHITELISTED_SERVERS_LIST:
+        # If not in the whitelisted list, check user subscription
         if not check_user_subscription(interaction.user.id):
             await interaction.response.send_message(
                 f"You do not have an active subscription. Please [click here]({SUBSCRIPTION_LINK}) to subscribe.",
@@ -86,15 +86,14 @@ async def get_dj_links(
     # Split the DJ names from the input
     dj_names_list = [name.strip() for name in dj_names.split(',')]
 
-    # Prepare response
     links_response = [f"Quest Compatible = {quest}"]
     
     # Fetch DJ Links from the Database
     for dj_name in dj_names_list:
         result = get_dj_links_from_db(dj_name, quest)
         if result:
-            dj_name, link = result
-            links_response.append(f"**{dj_name}** - {link if link else 'No link available'}")
+            found_dj_name, link = result
+            links_response.append(f"**{found_dj_name}** - {link if link else 'No link available'}")
         else:
             links_response.append(f"No match found for **{dj_name}**.")
     
