@@ -18,10 +18,8 @@ WHITELISTED_SERVERS = os.getenv('WHITELISTED_SERVERS')
 # Parse the environment variable into a list of integers
 if WHITELISTED_SERVERS:
     WHITELISTED_SERVERS_LIST = [int(sid.strip()) for sid in WHITELISTED_SERVERS.split(',')]
-    # logging.info(f"Whitelisted servers: {', '.join(map(str, WHITELISTED_SERVERS_LIST))}")
 else:
     WHITELISTED_SERVERS_LIST = []
-    # logging.info("No servers are whitelisted.")
 
 logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'), format='%(asctime)s - %(levelname)s - %(message)s')
 intents = discord.Intents.default()
